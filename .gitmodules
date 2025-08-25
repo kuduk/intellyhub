@@ -1,0 +1,15 @@
+[submodule "intellyhub-be"]
+	path = intellyhub-be
+	url = https://github.com/kuduk/intellyhub-be.git
+
+[submodule "intellyhub-fe"]
+	path = intellyhub-fe
+	url = https://github.com/kuduk/intellyhub-fe.git
+
+[submodule "ai-automation-fsm-py"]
+	path = ai-automation-fsm-py
+	url = https://github.com/kuduk/ai-automation-fsm-py.git
+
+[submodule "ai-automation-fsm-py/intellyhub-plugins"]
+	path = ai-automation-fsm-py/intellyhub-plugins
+	url = https://github.com/kuduk/intellyhub-plugins.git
