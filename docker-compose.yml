@@ -1,0 +1,57 @@
+services:
+  api:
+    build:
+      context: ./intellyhub-be
+      dockerfile: Dockerfile
+    env_file:
+      - ./intellyhub-be/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://user:pass@db:5432/intellyhub
+      FLOW_STORAGE_PATH: /data/flows
+      # esplicita dove cercare il kube-config
+      KUBECONFIG: /root/.kube/config
+      # Immagine per l'esecuzione dei flow
+      FSM_EXECUTOR_IMAGE: fsm-executor:latest
+    volumes:
+      # --- bind-mount della cartella di lavoro su /app per hot-reload ---
+      - ./intellyhub-be:/app
+      - ./intellyhub-be/entrypoint.sh:/app/entrypoint.sh:ro
+      # (mantieni temporaneamente per i flussi e il kube-config)
+      - ./intellyhub-be/flows:/data/flows
+      - ./intellyhub-be/k8s/config:/root/.kube/config:ro
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./intellyhub-fe
+      dockerfile: Dockerfile
+    volumes:
+      # --- bind-mount della cartella di lavoro per hot-reload ---
+      - ./intellyhub-fe:/app
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://api:5000
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    depends_on:
+      - api
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: intellyhub
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
