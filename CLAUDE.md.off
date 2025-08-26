@@ -79,18 +79,20 @@ IntellyHub/
 ### 1. Clone del Progetto
 ```bash
 # Se usi repository separate
-git clone <intellyhub-be-repo>
-git clone <intellyhub-fe-repo>
-git clone <ai-automation-fsm-py-repo>
-git clone <businessplan-repo>
+git clone git@github.com:kuduk/intellyhub-be
+git clone git@github.com:kuduk/intellyhub-fe
+git clone git@github.com:kuduk/ai-automation-fsm-py
+git clone git@github.com:kuduk/intellyhub-plugins # va dentro ad ai-automation-fsm-py
+git clone git@github.com:kuduk/intellyhub-businessplan
+
 ```
 
 ### 2. Setup Backend + Database
 ```bash
 cd intellyhub-be
 
-# Copia configurazione
-cp .env.example .env
+# Copia configurazione ed edita con i valori corretti gia se presente .env non fare nulla 
+cp .env.example .env 
 
 # Avvia backend + database
 docker-compose up -d
@@ -119,7 +121,7 @@ cd ai-automation-fsm-py
 # Installa dipendenze
 pip install -r requirements.txt
 
-# Copia configurazione
+# Copia configurazione ed edita con i valori corretti gia se presente .env non fare nulla 
 cp .env.example .env
 
 # Test con esempio
@@ -160,6 +162,8 @@ python main.py diagrammi/test_telegram_real.yaml
 - `YamlEditor` - Editor codice
 - `PluginManager` - Gestione plugin
 - `Dashboard` - Monitoring
+- `i18n` - Internazionalizzazione
+
 
 ### Worker Engine (ai-automation-fsm-py)
 **Stack:** Python + LangChain + Kubernetes

@@ -1,0 +1,1 @@
+- il progetto è containerizzato e si usa docker, il nomi dei container sono api, frontend e db
