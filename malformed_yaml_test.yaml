@@ -1,0 +1,115 @@
+name: Automazione di gestione email con sentiment negativo e chiamata ElevenLabs
+  start_state: email_listener
+  listener:
+    listener_type: email-listener
+  states:
+    stato_esempio:
+      state_type: llm_agent
+    email_listener:
+      state_type: email-listener
+      server: '{IMAP_SERVER}'
+      port: 993
+      username: '{IMAP_USERNAME}'
+      password: '{IMAP_PASSWORD}'
+      folder: INBOX
+      poll_interval: 300
+      output:
+        email_text: email_body
+        email_subject: email_subject
+        email_from: email_from
+      log:
+        level: error
+        message: "❌ Errore listener email: {error_message}"
+      success_transition: tts_conversion
+      error_transition: end
+    tts_conversion:
+      state_type: text_to_speech
+      api_key: '{ELEVENLABS_API_KEY}'
+      text: '{email_text}'
+      voice_id: 21m00Tcm4TlvDq8ikWAM
+      output: tts_result
+      log:
+        level: error
+        message: "❌ Errore conversione text to speech: {error_message}"
+      success_transition: analyze_sentiment
+      error_transition: end
+    analyze_sentiment:
+      state_type: llm_agent
+      provider: openai
+      model: gpt-4
+      api_key: '{OPENAI_API_KEY}'
+      temperature: 0.3
+      max_tokens: 100
+      system_prompt: >
+        Sei un analista di sentiment. Indica se il sentiment del testo è negativo,
+        neutro o positivo con una sola parola.
+      user_prompt: |
+        Analizza il sentiment del seguente testo:
+        """
+        {email_text}
+        """
+      output: sentiment_result
+      response_key: sentiment
+      log:
+        level: error
+        message: "❌ Errore analisi sentiment per email da {email_from}: {error_message}"
+      success_transition: check_negative_sentiment
+      error_transition: end
+    check_negative_sentiment:
+      state_type: if
+      condition: sentiment_result.lower() == 'negativo'
+      log: "🔍 Sentiment analizzato per email da {email_from}: {sentiment}"
+      transition_true: extract_phone_number
+      transition_false: end
+    extract_phone_number:
+      state_type: llm_agent
+      provider: openai
+      model: gpt-4
+      api_key: '{OPENAI_API_KEY}'
+      temperature: 0
+      max_tokens: 50
+      system_prompt: >
+        Sei un estrattore di numeri di telefono. Estrai il numero di telefono dal
+        testo fornito.
+
+        Restituisci solo il numero.
+      user_prompt: |
+        Estrai il numero di telefono dal seguente testo:
+        """
+        {email_text}
+        """
+      output: extracted_phone
+      response_key: phone_number
+      log:
+        level: error
+        message: "❌ Errore estrazione numero di telefono: {error_message}"
+      success_transition: check_phone_number
+      error_transition: end
+    check_phone_number:
+      state_type: if
+      condition: >-
+        extracted_phone.phone_number is not none and extracted_phone.phone_number
+        != ''
+      log: "📞 Numero di telefono trovato: {extracted_phone.phone_number}"
+      transition_true: batch_call_elevenlabs
+      transition_false: end
+    batch_call_elevenlabs:
+      state_type: elevenlabs_batch_calling
+      operation: submit
+      api_key: '{ELEVENLABS_API_KEY}'
+      call_name: Chiamata di follow-up
+      agent_id: '{ELEVENLABS_AGENT_ID}'
+      agent_phone_number_id: '{ELEVENLABS_AGENT_PHONE_ID}'
+      recipients:
+        - phone_number: '{extracted_phone.phone_number}'
+          contact_info:
+            name: Utente
+      message: Abbiamo notato un feedback negativo. Desideri parlare con un operatore?
+      output: batch_call_result
+      log:
+        level: error
+        message: "❌ Errore avvio chiamata ElevenLabs al numero {extracted_phone.phone_number}: {error_message}"
+      success_transition: end
+      error_transition: end
+    end:
+      state_type: end
