@@ -1,0 +1,55 @@
+# Test del nuovo comportamento strutturato con parametro 'output'
+# Confronta con test_telegram_listener.yaml per vedere la differenza
+
+listener:
+  listener_type: "telegram"
+  bot_token: "{TELEGRAM_BOT_TOKEN}"
+  polling_interval: 2
+  message_types: ["text"]
+  ignore_old_messages: true
+  output: "telegram_data"  # <- NUOVO: tutte le variabili in un oggetto
+
+variables:
+  TELEGRAM_BOT_TOKEN: "your_bot_token_here"
+
+states:
+  start:
+    state_type: "if"
+    condition: "'{telegram_data.telegram_message_text}'.startswith('/test')"
+    true_transition: "test_response"
+    false_transition: "echo_response"
+  
+  test_response:
+    state_type: "telegram-bot"
+    bot_token: "{TELEGRAM_BOT_TOKEN}"
+    chat_id: "{telegram_data.telegram_chat_id}"
+    message: |
+      ✅ <b>Test del Telegram Listener (Strutturato) riuscito!</b>
+      
+      📊 <b>Dati ricevuti (da oggetto strutturato):</b>
+      👤 Utente: {telegram_data.telegram_user_first_name} {telegram_data.telegram_user_last_name}
+      🆔 User ID: <code>{telegram_data.telegram_user_id}</code>
+      💬 Chat ID: <code>{telegram_data.telegram_chat_id}</code>
+      📝 Messaggio: <code>{telegram_data.telegram_message_text}</code>
+      🕐 Data: {telegram_data.telegram_message_date}
+      
+      🎉 Comportamento STRUTTURATO con output: "telegram_data"
+    parse_mode: "HTML"
+    transition: "end"
+  
+  echo_response:
+    state_type: "telegram-bot"
+    bot_token: "{TELEGRAM_BOT_TOKEN}"
+    chat_id: "{telegram_data.telegram_chat_id}"
+    message: |
+      🔄 <b>Echo Bot (Strutturato)</b>
+      
+      Hai scritto: <i>"{telegram_data.telegram_message_text}"</i>
+      
+      💡 Scrivi <code>/test</code> per vedere tutti i dati del messaggio.
+      🆕 Questo esempio usa il NUOVO parametro 'output'!
+    parse_mode: "HTML"
+    transition: "end"
+  
+  end:
+    state_type: "end"

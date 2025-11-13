@@ -1,0 +1,186 @@
+# ===================================================================
+# Example Flow Using Microservice Dependencies
+# ===================================================================
+# This flow demonstrates the automatic dependency resolution system.
+#
+# Key features:
+# 1. NO manual connection configuration required!
+# 2. DependencyResolver auto-injects NEO4J_* variables
+# 3. Microservices are automatically deployed if needed
+# 4. Health checks ensure services are available before execution
+# ===================================================================
+
+start_state: query_graph
+
+variables:
+  # Define business logic variables
+  min_connections: 5
+  max_results: 100
+  analysis_prompt: "Analyze the social network structure"
+
+states:
+  # =================================================================
+  # Step 1: Query Neo4j for network data
+  # =================================================================
+  query_graph:
+    state_type: mcp_neo4j
+    # ✨ NO neo4j_url, username, password needed!
+    # They are automatically injected by DependencyResolver:
+    #   NEO4J_BOLT_URL, NEO4J_USERNAME, NEO4J_PASSWORD
+
+    query: |
+      MATCH (p:Person)-[r:KNOWS]->(friend)
+      WHERE size((p)-[:KNOWS]->()) >= $min_connections
+      RETURN p.name AS person,
+             collect(friend.name) AS friends,
+             count(r) AS num_connections
+      ORDER BY num_connections DESC
+      LIMIT $max_results
+
+    parameters:
+      min_connections: "{min_connections}"
+      max_results: "{max_results}"
+
+    output: graph_data
+
+    log:
+      message: "Query executed, found {len(graph_data)} results"
+      level: info
+
+    success_transition: cache_results
+    error_transition: handle_error
+
+  # =================================================================
+  # Step 2: Cache results in Redis
+  # =================================================================
+  cache_results:
+    state_type: command
+    # ✨ REDIS_URL automatically injected!
+    cmd: |
+      redis-cli -h redis-cache.intellyhub.svc.cluster.local \
+        SET "graph:latest" '{graph_data}'
+
+    log:
+      message: "Cached graph data in Redis"
+      level: info
+
+    transition: analyze_with_ai
+
+  # =================================================================
+  # Step 3: Analyze with LLM
+  # =================================================================
+  analyze_with_ai:
+    state_type: llm_agent_lite
+    provider: openai
+    model: gpt-4
+    temperature: 0.7
+
+    system_prompt: |
+      You are a social network analyst. Analyze the provided graph data
+      and provide insights about network structure, influential nodes,
+      and community patterns.
+
+    user_prompt: |
+      {analysis_prompt}
+
+      Graph data:
+      {graph_data}
+
+    output: ai_analysis
+
+    log:
+      message: "AI analysis completed"
+      level: info
+
+    transition: store_in_elasticsearch
+
+  # =================================================================
+  # Step 4: Index analysis in Elasticsearch
+  # =================================================================
+  store_in_elasticsearch:
+    state_type: elasticsearch_search
+    # ✨ ELASTICSEARCH_URL automatically injected!
+
+    operation: index
+    index: "network-analysis"
+    document:
+      timestamp: "{now()}"
+      graph_data: "{graph_data}"
+      ai_analysis: "{ai_analysis}"
+      parameters:
+        min_connections: "{min_connections}"
+        max_results: "{max_results}"
+
+    output: indexed_doc
+
+    log:
+      message: "Analysis indexed in Elasticsearch: {indexed_doc['_id']}"
+      level: info
+
+    transition: send_notification
+
+  # =================================================================
+  # Step 5: Send notification via custom API
+  # =================================================================
+  send_notification:
+    state_type: command
+    # ✨ CUSTOM_API_BASE_URL automatically injected!
+    cmd: |
+      curl -X POST {CUSTOM_API_BASE_URL}/notifications \
+        -H "Authorization: Bearer {CUSTOM_API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "type": "analysis_complete",
+          "message": "Social network analysis completed",
+          "doc_id": "{indexed_doc['_id']}"
+        }'
+
+    log:
+      message: "Notification sent"
+      level: info
+
+    transition: end
+
+  # =================================================================
+  # Error Handling
+  # =================================================================
+  handle_error:
+    state_type: command
+    cmd: echo "ERROR: {error_message}"
+
+    log:
+      message: "Flow failed: {error_message}"
+      level: error
+
+    transition: end
+
+  # =================================================================
+  # End State
+  # =================================================================
+  end:
+    state_type: end
+
+# ===================================================================
+# NOTES:
+# ===================================================================
+# 1. This flow uses 4 different microservices:
+#    - Neo4j (graph database)
+#    - Redis (cache)
+#    - Elasticsearch (search/analytics)
+#    - Custom API (notifications)
+#
+# 2. ALL connection details are auto-injected by DependencyResolver:
+#    - NEO4J_BOLT_URL, NEO4J_USERNAME, NEO4J_PASSWORD
+#    - REDIS_URL
+#    - ELASTICSEARCH_URL, ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD
+#    - CUSTOM_API_BASE_URL, CUSTOM_API_KEY
+#
+# 3. DependencyResolver will:
+#    - Read plugin manifests (mcp_neo4j, elasticsearch_search, etc.)
+#    - Find matching microservices from user's microservices.yaml
+#    - Deploy local microservices if not already running
+#    - Run health checks to ensure services are available
+#    - Inject connection variables before execution
+#
+# 4. User experience is ZERO-CONFIG! 🎉
+# ===================================================================

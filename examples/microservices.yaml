@@ -1,0 +1,315 @@
+# ===================================================================
+# Example Microservices Configuration
+# ===================================================================
+# This file defines microservices available to the user/organization.
+# It can be placed at:
+#   - User level: /data/users/{user_id}/microservices.yaml
+#   - Organization level: /data/organizations/{org_id}/microservices.yaml
+#
+# Microservices can be:
+#   - local: Deployed in Kubernetes by IntellyHub
+#   - remote: External services (cloud, on-premise)
+# ===================================================================
+
+version: "1.0"
+
+microservices:
+  # =========================================================
+  # Neo4j Graph Database (Local Kubernetes Deployment)
+  # =========================================================
+  - id: neo4j-local
+    name: "Neo4j Graph Database"
+    description: "Local Neo4j instance for graph data processing"
+    type: neo4j
+    location: local
+
+    # Configuration for Kubernetes deployment
+    config:
+      image: neo4j:5.15
+      replicas: 1
+      ports:
+        - name: bolt
+          containerPort: 7687
+          servicePort: 7687
+        - name: http
+          containerPort: 7474
+          servicePort: 7474
+      volumes:
+        - name: neo4j-data
+          mountPath: /data
+          size: 20Gi
+        - name: neo4j-logs
+          mountPath: /logs
+          size: 5Gi
+      env:
+        - name: NEO4J_AUTH
+          value: "neo4j/{NEO4J_PASSWORD}"
+        - name: NEO4J_dbms_memory_heap_max__size
+          value: "2G"
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "1000m"
+        limits:
+          memory: "4Gi"
+          cpu: "2000m"
+      healthCheck:
+        type: tcp
+        port: 7687
+        initialDelay: 30
+        period: 10
+
+    # Connection information (auto-injected into flows)
+    connection:
+      bolt_url: "bolt://neo4j-local.intellyhub.svc.cluster.local:7687"
+      http_url: "http://neo4j-local.intellyhub.svc.cluster.local:7474"
+      username: "neo4j"
+      password: "{NEO4J_PASSWORD}"  # From secrets
+
+    tags: ["database", "graph", "neo4j", "local"]
+    cost_estimate: "$25/month"
+
+  # =========================================================
+  # Neo4j AuraDB (Remote Cloud Service)
+  # =========================================================
+  - id: neo4j-cloud
+    name: "Neo4j AuraDB (Cloud)"
+    description: "Managed Neo4j instance on Neo4j AuraDB"
+    type: neo4j
+    location: remote
+
+    # No 'config' section for remote services
+
+    # Connection information
+    connection:
+      bolt_url: "neo4j+s://xxxxx.databases.neo4j.io"
+      http_url: "https://xxxxx.databases.neo4j.io/browser/"
+      username: "neo4j"
+      password: "{NEO4J_CLOUD_PASSWORD}"
+
+    tags: ["database", "graph", "neo4j", "cloud", "managed"]
+    cost_estimate: "$65/month"
+
+  # =========================================================
+  # Redis Cache (Local)
+  # =========================================================
+  - id: redis-cache
+    name: "Redis Cache"
+    description: "In-memory data structure store for caching"
+    type: redis
+    location: local
+
+    config:
+      image: redis:7-alpine
+      replicas: 1
+      ports:
+        - name: redis
+          containerPort: 6379
+          servicePort: 6379
+      volumes:
+        - name: redis-data
+          mountPath: /data
+          size: 5Gi
+      env:
+        - name: REDIS_PASSWORD
+          value: "{REDIS_PASSWORD}"
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "500m"
+      healthCheck:
+        type: tcp
+        port: 6379
+        initialDelay: 10
+        period: 5
+
+    connection:
+      url: "redis://redis-cache.intellyhub.svc.cluster.local:6379"
+      password: "{REDIS_PASSWORD}"
+
+    tags: ["cache", "redis", "local"]
+    cost_estimate: "$10/month"
+
+  # =========================================================
+  # PostgreSQL (AWS RDS - Remote)
+  # =========================================================
+  - id: postgres-rds
+    name: "PostgreSQL (AWS RDS)"
+    description: "Managed PostgreSQL on AWS RDS"
+    type: postgresql
+    location: remote
+
+    connection:
+      url: "postgresql://username:password@mydb.xxxxx.us-east-1.rds.amazonaws.com:5432/mydatabase"
+      host: "mydb.xxxxx.us-east-1.rds.amazonaws.com"
+      port: 5432
+      database: "mydatabase"
+      username: "dbuser"
+      password: "{POSTGRES_PASSWORD}"
+
+    tags: ["database", "postgresql", "aws", "rds", "remote"]
+    cost_estimate: "$120/month"
+
+  # =========================================================
+  # Elasticsearch (Local)
+  # =========================================================
+  - id: elasticsearch
+    name: "Elasticsearch"
+    description: "Distributed search and analytics engine"
+    type: elasticsearch
+    location: local
+
+    config:
+      image: elasticsearch:8.11
+      replicas: 3
+      ports:
+        - name: http
+          containerPort: 9200
+          servicePort: 9200
+        - name: transport
+          containerPort: 9300
+          servicePort: 9300
+      volumes:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+          size: 50Gi
+      env:
+        - name: discovery.type
+          value: "single-node"
+        - name: xpack.security.enabled
+          value: "false"
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "1000m"
+        limits:
+          memory: "4Gi"
+          cpu: "2000m"
+      healthCheck:
+        type: http
+        port: 9200
+        path: "/_cluster/health"
+        initialDelay: 60
+        period: 15
+
+    connection:
+      url: "http://elasticsearch.intellyhub.svc.cluster.local:9200"
+      username: "elastic"
+      password: "{ELASTICSEARCH_PASSWORD}"
+
+    tags: ["search", "analytics", "elasticsearch", "local"]
+    cost_estimate: "$80/month"
+
+  # =========================================================
+  # MongoDB (Local)
+  # =========================================================
+  - id: mongodb
+    name: "MongoDB"
+    description: "Document-oriented NoSQL database"
+    type: mongodb
+    location: local
+
+    config:
+      image: mongo:7
+      replicas: 1
+      ports:
+        - name: mongo
+          containerPort: 27017
+          servicePort: 27017
+      volumes:
+        - name: mongo-data
+          mountPath: /data/db
+          size: 30Gi
+      env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: "{MONGODB_PASSWORD}"
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "500m"
+        limits:
+          memory: "2Gi"
+          cpu: "1000m"
+      healthCheck:
+        type: tcp
+        port: 27017
+        initialDelay: 20
+        period: 10
+
+    connection:
+      url: "mongodb://admin:{MONGODB_PASSWORD}@mongodb.intellyhub.svc.cluster.local:27017/admin"
+      host: "mongodb.intellyhub.svc.cluster.local"
+      port: 27017
+      username: "admin"
+      password: "{MONGODB_PASSWORD}"
+
+    tags: ["database", "mongodb", "nosql", "local"]
+    cost_estimate: "$35/month"
+
+  # =========================================================
+  # Custom API Service (Generic Container)
+  # =========================================================
+  - id: custom-api
+    name: "Custom API Service"
+    description: "Custom REST API for business logic"
+    type: generic
+    location: local
+
+    config:
+      image: my-registry.com/my-custom-api:v1.2.3
+      replicas: 2
+      ports:
+        - name: http
+          containerPort: 8080
+          servicePort: 80
+      env:
+        - name: DATABASE_URL
+          value: "{POSTGRES_URL}"
+        - name: REDIS_URL
+          value: "{REDIS_URL}"
+        - name: API_KEY
+          value: "{CUSTOM_API_KEY}"
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "500m"
+        limits:
+          memory: "1Gi"
+          cpu: "1000m"
+      healthCheck:
+        type: http
+        port: 8080
+        path: "/health"
+        initialDelay: 15
+        period: 10
+
+    connection:
+      base_url: "http://custom-api.intellyhub.svc.cluster.local"
+      api_key: "{CUSTOM_API_KEY}"
+
+    tags: ["api", "custom", "rest", "local"]
+    cost_estimate: "$40/month"
+
+  # =========================================================
+  # Apache Kafka (Remote - Confluent Cloud)
+  # =========================================================
+  - id: kafka-confluent
+    name: "Apache Kafka (Confluent Cloud)"
+    description: "Managed Kafka on Confluent Cloud"
+    type: kafka
+    location: remote
+
+    connection:
+      bootstrap_servers: "pkc-xxxxx.us-east-1.aws.confluent.cloud:9092"
+      sasl_username: "{KAFKA_API_KEY}"
+      sasl_password: "{KAFKA_API_SECRET}"
+      security_protocol: "SASL_SSL"
+      sasl_mechanism: "PLAIN"
+
+    tags: ["messaging", "kafka", "streaming", "cloud"]
+    cost_estimate: "$100/month"

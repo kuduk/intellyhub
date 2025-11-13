@@ -1,0 +1,125 @@
+{
+  "name": "mcp-neo4j",
+  "version": "1.0.0",
+  "description": "MCP server plugin for Neo4j graph database. Allows querying and manipulating graph data using Cypher queries.",
+  "author": "IntellyHub Team",
+  "license": "MIT",
+  "entry_file": "mcp_neo4j_state.py",
+  "state_type": "mcp_neo4j",
+  "plugin_type": "state",
+
+  "dependencies": {
+    "services": [
+      {
+        "type": "neo4j",
+        "required": true,
+        "min_version": "5.0",
+        "prefer": "remote",
+        "fallback": ["local"],
+        "connection_vars": {
+          "bolt_url": "NEO4J_BOLT_URL",
+          "http_url": "NEO4J_HTTP_URL",
+          "username": "NEO4J_USERNAME",
+          "password": "NEO4J_PASSWORD"
+        },
+        "health_check": {
+          "type": "tcp",
+          "port": 7687,
+          "timeout": 5
+        }
+      }
+    ],
+    "packages": [
+      "neo4j-driver>=5.15.0",
+      "requests>=2.25.0"
+    ]
+  },
+
+  "configuration": {
+    "neo4j_url": {
+      "type": "string",
+      "required": false,
+      "description": "Neo4j Bolt URL (auto-configured if microservice available)",
+      "default": "${NEO4J_BOLT_URL}"
+    },
+    "username": {
+      "type": "string",
+      "required": false,
+      "description": "Neo4j username (auto-configured)",
+      "default": "${NEO4J_USERNAME}"
+    },
+    "password": {
+      "type": "string",
+      "required": false,
+      "description": "Neo4j password (auto-configured)",
+      "default": "${NEO4J_PASSWORD}"
+    },
+    "query": {
+      "type": "string",
+      "required": true,
+      "description": "Cypher query to execute"
+    },
+    "parameters": {
+      "type": "object",
+      "required": false,
+      "description": "Query parameters"
+    },
+    "output": {
+      "type": "string",
+      "required": false,
+      "description": "Variable name to store query results"
+    }
+  },
+
+  "examples": [
+    {
+      "name": "Simple node query",
+      "description": "Query all Person nodes",
+      "config": {
+        "state_type": "mcp_neo4j",
+        "query": "MATCH (n:Person) RETURN n LIMIT 10",
+        "output": "people",
+        "transition": "process_results"
+      }
+    },
+    {
+      "name": "Parameterized query",
+      "description": "Find relationships for a specific person",
+      "config": {
+        "state_type": "mcp_neo4j",
+        "query": "MATCH (p:Person {name: $name})-[:KNOWS]->(friend) RETURN friend",
+        "parameters": {
+          "name": "{person_name}"
+        },
+        "output": "friends",
+        "transition": "analyze_network"
+      }
+    },
+    {
+      "name": "Write operation",
+      "description": "Create a new node",
+      "config": {
+        "state_type": "mcp_neo4j",
+        "query": "CREATE (p:Person {name: $name, age: $age}) RETURN p",
+        "parameters": {
+          "name": "{new_person_name}",
+          "age": "{new_person_age}"
+        },
+        "output": "created_person",
+        "transition": "end"
+      }
+    }
+  ],
+
+  "installation": {
+    "instructions": [
+      "1. Ensure a Neo4j microservice is configured (local or remote)",
+      "2. The plugin will automatically connect to the configured Neo4j instance",
+      "3. Dependencies will be installed on first use",
+      "4. No manual configuration required - connection details are auto-injected!"
+    ]
+  },
+
+  "api_version": "1.0",
+  "tags": ["neo4j", "graph", "database", "cypher", "mcp"]
+}
