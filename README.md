@@ -1,163 +1,148 @@
 # 🚀 IntellyHub
 
-**IntellyHub** è una piattaforma enterprise per l'automazione dei processi aziendali con intelligenza artificiale, sistema di plugin dinamico e architettura cloud-native scalabile.
+**IntellyHub** is an enterprise automation platform that blends AI-powered workflows, a dynamic plugin ecosystem, and a cloud-native architecture for scale and reliability.
 
-## ✨ Caratteristiche Principali
+## ✨ Key Capabilities
 
-- 🤖 **AI-Powered Automation**: Integrazione completa con OpenAI e LangChain
-- 🔌 **Sistema Plugin Dinamico**: Estendibilità infinita tramite plugin distribuiti
-- 👥 **Multi-Tenant**: Isolamento completo tra utenti e organizzazioni
-- 💰 **Billing Enterprise**: Gestione completa sottoscrizioni con Stripe
-- 🔒 **Security Advanced**: Audit logging, protezione brute-force, JWT sicuri
-- 📊 **Analytics & BI**: Dashboard analytics con metriche business avanzate
-- ☸️ **Kubernetes Native**: Esecuzione flow in container isolati
-- 🌐 **Architettura Moderna**: Frontend Vue.js + Backend Flask + Database PostgreSQL
-- 🤖 **FSM Engine**: Motore Python per esecuzione flow con stati, listener e plugin
+- 🤖 **AI-Powered Automation**: Deep integration with OpenAI, LangChain, and custom agents
+- 🔌 **Dynamic Plugin System**: Distributed plugins with auto-installation and manifest validation
+- 👥 **User & Audit Management**: Fine-grained roles, admin control panel, and full audit trail
+- 💰 **Billing & Subscriptions**: Stripe-based plans, add-on pods, and detailed usage tracking
+- 🔒 **Security Controls**: Optional Redis rate limiting, encrypted secrets, hardened JWT flows
+- 📊 **Analytics & BI**: Business KPIs, CSV/Excel exports, and admin dashboards
+- ☸️ **Kubernetes Native**: Flow execution delegated to isolated FSM executor containers
+- 🌐 **Modern Stack**: Vue 3 frontend + Flask backend + PostgreSQL database
+- 🤖 **FSM Engine**: Python runtime that interprets YAML workflows with states, listeners, and plugins
 
-## 🏗️ Architettura del Sistema
+## 📚 Documentation Map
+
+- [docs/README.md](docs/README.md) — global documentation index
+- [docs/quick-start.md](docs/quick-start.md) — bring the stack up in minutes via Docker
+- [docs/installation.md](docs/installation.md) — prerequisites, manual setup, and environment variables
+- [docs/architecture.md](docs/architecture.md) — end-to-end view of frontend, backend, FSM, and infra
+- [intellyhub-be/docs/README.md](intellyhub-be/docs/README.md) — backend entry point (API, DB, dev guide)
+- [intellyhub-fe/docs/README.md](intellyhub-fe/docs/README.md) — frontend entry point (Vue Flow editor, composables)
+- [ai-automation-fsm-py/docs/README.md](ai-automation-fsm-py/docs/README.md) — FSM engine states, listeners, and tooling
+- `intellyhub-be/documentazione/` and `ai-automation-fsm-py/documentazione/` — in-depth whitepapers on security fixes, plugin changes, restart strategies, etc.
+
+## 🏗️ System Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Database      │
-│   Vue.js + Vite│◄──►│  Flask + SQLAlch│◄──►│   PostgreSQL    │
-│   Port: 5173    │    │   Port: 5000    │    │   Port: 5432    │
+│     Frontend    │    │     Backend     │    │    Database     │
+│ Vue 3 + Vite    │◄──►│ Flask + SQLA    │◄──►│ PostgreSQL 15   │
+│ Port: 5173      │    │ Port: 5000      │    │ Port: 5432      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
                                  │
-                    ┌─────────────────┐
-                    │   Kubernetes    │
-                    │ Flow Execution  │
-                    │   (Isolated)    │
-                    └─────────────────┘
+                    ┌───────────────────────────────┐
+                    │ Kubernetes Flow Execution     │
+                    │ (isolated FSM executor pods)  │
+                    └───────────────────────────────┘
                                  │
-                    ┌─────────────────┐
-                    │ FSM Executor    │
-                    │ Python Engine   │
-                    │ ai-automation-  │
-                    │    fsm-py       │
-                    └─────────────────┘
+                    ┌───────────────────────────────┐
+                    │ ai-automation-fsm-py Engine    │
+                    │ States • Listeners • Plugins   │
+                    └───────────────────────────────┘
 ```
 
-## 📁 Struttura del Progetto
+## 📁 Project Structure
 
 ```
 IntellyHub/
-├── 📂 intellyhub-be/           # Backend Flask API
-│   ├── 📂 app/                 # Core application
-│   │   ├── 📂 services/        # Business logic (Service Layer)
-│   │   ├── 📂 middleware/      # Middleware personalizzati
-│   │   ├── 📂 schemas/         # Data schemas
-│   │   ├── 🐍 models.py        # Database models
-│   │   ├── 🐍 auth.py          # Autenticazione JWT
-│   │   ├── 🐍 flows.py         # Gestione flow automazione
-│   │   ├── 🐍 billing.py       # Sistema billing Stripe
-│   │   ├── 🐍 admin.py         # Panel amministrazione
-│   │   ├── 🐍 plugins.py       # Sistema plugin dinamico
-│   │   └── 🐍 analytics.py     # Business intelligence
-│   ├── 📂 migrations/          # Database migrations
-│   ├── 📂 tests/              # Suite di test completa
-│   ├── 🐳 Dockerfile          # Container backend
-│   └── 📋 requirements.txt    # Dipendenze Python
-├── 📂 intellyhub-fe/           # Frontend Vue.js
-│   ├── 📂 src/
-│   │   ├── 📂 components/      # Componenti Vue
-│   │   ├── 📂 pages/          # Pagine applicazione
-│   │   ├── 📂 composables/    # Logic riusabile
-│   │   ├── 📂 layouts/        # Layout templates
-│   │   └── 📂 locales/        # Internazionalizzazione
-│   ├── 📂 tests/              # Test frontend
-│   ├── 🐳 Dockerfile          # Container frontend
-│   └── 📦 package.json        # Dipendenze Node.js
-├── 📂 ai-automation-fsm-py/   # 🚀 FSM Execution Engine
-│   ├── 📂 flow/               # Core FSM Framework
-│   │   ├── 📂 states/         # Tipi di stato (command, if, loop, etc.)
-│   │   ├── 📂 listeners/      # Event listeners (email, webhook, RSS)
-│   │   ├── 🐍 flow.py         # Parser YAML e Flow Engine
-│   │   ├── 🐍 lazy_loader.py  # Sistema caricamento dinamico
-│   │   └── 🐍 plugin_loader.py# Gestione plugin runtime
-│   ├── 📂 diagrammi/          # Template e esempi YAML flows
-│   ├── 📂 documentazione/     # Guide complete DSL e plugin
-│   ├── 📂 test/              # Test suite per FSM engine
-│   ├── 🐍 main.py            # Entry point con auto-restart
-│   ├── 🐍 package_manager.py # Gestione dipendenze plugin
-│   ├── 🐳 Dockerfile         # Container FSM executor
-│   └── 📋 requirements.txt   # Dipendenze Python FSM
-├── 🐳 docker-compose.yml      # Orchestrazione servizi
-└── 📖 README.md               # Questa documentazione
+├── intellyhub-be/              # Flask backend API
+│   ├── app/                    # Core application packages
+│   │   ├── services/           # Business logic (service layer)
+│   │   ├── middleware/         # Custom middleware (metrics, auth helpers)
+│   │   ├── schemas/            # Marshmallow schemas
+│   │   ├── models.py           # SQLAlchemy models
+│   │   ├── auth.py             # JWT auth endpoints
+│   │   ├── flows.py            # Flow CRUD/execution APIs
+│   │   ├── billing.py          # Stripe integration
+│   │   ├── admin.py            # Admin panel APIs
+│   │   └── analytics.py        # Business intelligence endpoints
+│   ├── migrations/             # Alembic migrations
+│   ├── tests/                  # Backend test suite
+│   ├── Dockerfile              # Backend container definition
+│   └── requirements.txt        # Python dependencies
+├── intellyhub-fe/              # Vue 3 + Vite frontend
+│   ├── src/                    # Components, pages, composables, layouts
+│   ├── tests/                  # Vitest suite
+│   ├── Dockerfile              # Frontend container definition
+│   └── package.json            # Node dependencies and scripts
+├── ai-automation-fsm-py/       # FSM execution engine
+│   ├── flow/                   # States, listeners, flow parser
+│   ├── diagrammi/              # Sample YAML diagrams
+│   ├── documentazione/         # Deep-dive docs (DSL, plugins, restarts)
+│   ├── test/                   # pytest suite for the engine
+│   ├── main.py                 # Entry point with auto-restart
+│   ├── package_manager.py      # Plugin dependency management
+│   └── Dockerfile              # Executor container
+├── docker-compose.yml          # Local orchestration for API + FE + DB
+└── README.md                   # This document
 ```
 
 ## 🚀 Quick Start
 
-### 1. Prerequisiti
+### 1. Prerequisites
 
 ```bash
-# Verifica Docker e Docker Compose
+# Docker and Compose
 docker --version          # >= 20.10
 docker compose --version  # >= 2.0
 ```
 
-### 2. Setup Ambiente
+### 2. Clone and Configure
 
 ```bash
-# Clone del repository
 git clone https://github.com/kuduk/IntellyHub.git
 cd IntellyHub
 
-# Configura ambiente backend
 cd intellyhub-be
-cp .env.example .env
-# ✏️ Modifica .env con le tue configurazioni
+cp .env.example .env   # fill in secrets later
 cd ..
 ```
 
-### 3. Avvio Sistema
+### 3. Start the Stack
 
 ```bash
-# Avvia tutti i servizi con build
-docker compose up --build
+docker compose up --build          # foreground
+# or
+docker compose up -d --build       # detached
 
-# In modalità detached (background)
-docker compose up -d --build
-
-# Verifica stato servizi
-docker compose ps
+docker compose ps                  # verify services
 ```
 
-### 4. Inizializzazione Database
+### 4. Initialize the Database
 
 ```bash
-# Applica migrazioni database
-docker compose exec api python3 -m flask db upgrade
-
-# Popola piani di pricing
-docker compose exec api python3 populate_plans.py
-
-# Crea utente amministratore
-docker compose exec api python3 setup_admin.py
+docker compose exec api python -m flask db upgrade
+docker compose exec api python populate_plans.py
+docker compose exec api python setup_admin.py
 ```
 
-### 5. Accesso alle Applicazioni
+### 5. Access Points
 
-- 🌐 **Frontend**: http://localhost:5173
-- 🔌 **API Backend**: http://localhost:5000
-- 📚 **API Docs**: http://localhost:5000/api/docs
-- 🗄️ **Database**: localhost:5432
+- 🌐 Frontend: http://localhost:5173
+- 🔌 Backend API: http://localhost:5000
+- 📚 Swagger (dev): http://localhost:5000/docs
+- 🗄️ PostgreSQL: localhost:5432 (user `user`, password `pass`)
 
-## 🔧 Configurazione Avanzata
+## 🔧 Advanced Configuration
 
-### Variabili d'Ambiente Principali
+### Core Environment Variables
 
 ```bash
-# === CORE CONFIGURATION ===
-SECRET_KEY=your-super-secret-key-here
-JWT_SECRET_KEY=your-jwt-secret-key-here
+# === CORE ===
+SECRET_KEY=replace-with-random
+JWT_SECRET_KEY=replace-with-random
 DATABASE_URL=postgresql+psycopg2://user:pass@db:5432/intellyhub
 
-# === STRIPE BILLING ===
-STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=pk_live_your_stripe_publishable_key
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+# === STRIPE ===
+STRIPE_SECRET_KEY=sk_live_xxx
+STRIPE_PUBLISHABLE_KEY=pk_live_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
 STRIPE_PRICE_ID_STANDARD=price_standard_plan_id
 STRIPE_PRICE_ID_BUSINESS=price_business_plan_id
 STRIPE_PRICE_ID_ENTERPRISE=price_enterprise_plan_id
@@ -176,10 +161,9 @@ JWT_ACCESS_TOKEN_EXPIRES_HOURS=4
 JWT_ADMIN_TOKEN_EXPIRES_HOURS=1
 ```
 
-### Configurazione Produzione
+### Production Extras
 
 ```bash
-# Variabili specifiche produzione
 FLASK_ENV=production
 DEBUG=False
 SECURE_SSL_REDIRECT=True
@@ -188,368 +172,162 @@ REDIS_URL=redis://your-redis-host:6379/0
 SENTRY_DSN=https://your-sentry-dsn
 ```
 
-## 📊 Funzionalità Enterprise
+## 📊 Enterprise Features
 
-### 💰 Sistema Billing Completo
-- **Piani di Pricing**: Free, Standard, Business, Scale, Enterprise
-- **Sottoscrizioni Ricorrenti**: Gestione automatica con Stripe
-- **Add-on Pod**: Risorse aggiuntive per scaling
-- **Fatturazione Automatica**: Invoice e payment tracking
-- **Analytics Revenue**: MRR, churn rate, conversion metrics
+### Billing
+- Plans: Free, Standard, Business, Scale, Enterprise
+- Automated subscriptions via Stripe and webhook inbox
+- Add-on pods for bursting workloads
+- Invoice tracking plus revenue metrics (MRR, churn, conversion)
 
-### 🔒 Sicurezza Enterprise-Grade
-- **Password Policy**: Lunghezza minima, complessità obbligatoria
-- **Protezione Brute Force**: Blocco IP automatico dopo 5 tentativi
-- **JWT Sicuri**: Claims avanzati con validazione IP/Browser
-- **Audit Logging**: Log completo di tutte le operazioni
-- **Rate Limiting**: Protezione API con Redis
+### Security
+- Password policies and brute-force protection
+- Signed JWTs with IP/agent validation hooks
+- Centralized audit logging for every admin/user action
+- Optional Redis-backed rate limiting per endpoint
 
-### 👑 Panel Amministrazione
-- **Dashboard KPI**: Metriche business in real-time
-- **Gestione Utenti**: CRUD completo con ruoli avanzati
-- **Sottoscrizioni**: Modifica piani e billing management
-- **Analytics**: Conversion rate, churn, revenue breakdown
-- **Security Alerts**: Monitoraggio eventi sospetti
-- **Audit Trail**: Export log per compliance
+### Admin Console
+- KPI dashboard with rolling 30-day stats
+- User management with bulk actions and plan changes
+- Subscription management and billing insights
+- Alerting for suspicious events and audit exports
 
-### 🔌 Sistema Plugin Dinamico
-- **Repository GitHub**: Plugin distribuiti automaticamente
-- **Installazione Automatica**: Analisi YAML per suggerire plugin
-- **Configurazione Per-Flow**: Plugin isolati per ogni automazione
-- **Hot-Reload**: Aggiornamento plugin senza restart
+### Plugin System
+- GitHub-hosted plugin registry with manifest validation
+- Auto-install suggestions based on YAML analysis
+- Per-flow plugin configuration and hot reload
 
-### 📈 Analytics & Business Intelligence
-- **Metriche Business**: MRR, ARPU, conversion rate, churn
-- **Utilizzo Sistema**: Pod utilization, API metrics
-- **Export Dati**: CSV/Excel per analisi esterne
-- **Dashboard Real-time**: KPI aggiornati automaticamente
+### Analytics & BI
+- Business metrics (MRR, ARPU, conversion, churn)
+- System usage (pods, executions, API volume)
+- CSV/Excel exports for external processing
+- Real-time dashboards backed by the analytics service
 
 ## 🧪 Testing
 
-### Backend Testing
-
+### Backend
 ```bash
-# Entra nel container backend
 docker compose exec api bash
-
-# Run test suite completa
 python -m pytest
-
-# Test con coverage
 python -m pytest --cov=app --cov-report=html
-
-# Test specifici
 python -m pytest tests/unit/
 python -m pytest tests/integration/
 python -m pytest tests/security/
 ```
 
-### Frontend Testing
-
+### Frontend
 ```bash
-# Entra nel container frontend
 docker compose exec frontend sh
-
-# Run test suite
 npm test
-
-# Test con UI
 npm run test:ui
-
-# Test con coverage
 npm run test:coverage
-
-# Test in watch mode
 npm run test:watch
 ```
 
-## 🤖 FSM Engine (ai-automation-fsm-py)
+### FSM Engine
+```bash
+cd ai-automation-fsm-py
+pytest
+pytest --cov=flow --cov-report=html
+pytest test/test_states/ -v
+```
 
-Il **FSM Engine** è il cuore dell'automazione di IntellyHub, un potente motore Python che esegue i flow basati su macchine a stati finiti (FSM) definiti in YAML.
+## 🤖 FSM Engine Overview (ai-automation-fsm-py)
 
-### 🎯 Caratteristiche del FSM Engine
+- YAML-based DSL for describing complex workflows
+- Finite-state architecture with transitions, listeners, and scoped variables
+- Built-in states: command, if, loop, switch, llm_agent, telegram-bot, facebook, linkedin, rss_reader, text_to_speech, file, end, etc.
+- Event listeners: email, webhook, rss, telegram, directory, mqtt, MCP, A2A
+- Auto-restart, lazy loading, and dynamic plugin discovery via `STATE_REGISTRY` and `LISTENER_REGISTRY`
+- Plugin management through `package_manager.py` and remote manifests
 
-- **📝 DSL YAML**: Linguaggio specifico per definire workflow complessi
-- **🔄 Stati e Transizioni**: Architettura a stati finiti con transizioni dinamiche  
-- **👂 Event Listeners**: Supporto per eventi esterni (email, webhook, RSS, Telegram)
-- **🔌 Plugin System**: Estensibilità completa con caricamento dinamico
-- **🧠 AI Integration**: Integrazione nativa con LLM (OpenAI, Ollama)
-- **📊 Variable System**: Gestione avanzata variabili e interpolazione
-- **🔄 Auto-Restart**: Meccanismo automatico di restart e recovery
-- **🧪 Test Coverage**: Suite di test completa per ogni componente
-
-### 📋 Tipi di Stato Disponibili
-
-| Tipo di Stato | Descrizione | Esempi d'Uso |
-|---------------|-------------|---------------|
-| **command** | Esecuzione comandi shell | Script, deploy, file operations |
-| **if** | Logica condizionale | Branching, validazione dati |
-| **loop** | Iterazione su collezioni | Batch processing, data transformation |
-| **llm_agent** | Integrazione AI/LLM | ChatGPT, Ollama, reasoning |
-| **telegram-bot** | Bot Telegram | Notifiche, interactive chat |
-| **facebook** | API Facebook | Social media automation |
-| **linkedin** | Scraping LinkedIn | Lead generation, talent search |
-| **rss_reader** | Feed RSS/Atom | News monitoring, content aggregation |
-| **text_to_speech** | Text-to-Speech | Audio notifications, accessibility |
-| **file** | File operations | Read/write/move files |
-| **end** | Terminazione flow | Success/failure completion |
-
-### 👂 Event Listeners Supportati
-
-| Listener | Descrizione | Trigger Events |
-|----------|-------------|----------------|
-| **email** | Monitoraggio email IMAP | Nuove email, filtri mittente/oggetto |
-| **webhook** | Server webhook HTTP | POST requests, payload processing |
-| **rss** | Feed RSS/Atom | Nuovi articoli, keyword matching |
-| **telegram** | Bot Telegram | Messaggi, comandi, inline queries |
-| **directory** | File system watcher | File creati/modificati/eliminati |
-| **mqtt** | Message broker MQTT | Topic subscription, IoT events |
-
-### 🔧 Esempio di Flow YAML
+### Sample Flow
 
 ```yaml
-# Esempio: Monitoraggio RSS con notifica Telegram
 name: "RSS News Monitor"
-description: "Monitora feed RSS e invia notifiche Telegram per news rilevanti"
+description: "Watch RSS feeds and send Telegram notifications for matching stories"
 
-# Variabili globali
 variables:
   telegram_bot_token: "{TELEGRAM_BOT_TOKEN}"
   telegram_chat_id: "{TELEGRAM_CHAT_ID}"
   keywords: ["AI", "automation", "python"]
 
-# Listener per eventi RSS
 listener:
   type: rss
   url: "https://feeds.feedburner.com/oreilly/radar"
-  check_interval: 300  # 5 minuti
+  check_interval: 300
 
-# Stato iniziale
-start_state: "process_article"
+start_state: process_article
 
 states:
-  # Processa nuovo articolo RSS
   process_article:
     state_type: if
     condition: "{event.title} contains any {keywords}"
-    true_transition: "send_notification"
-    false_transition: "end"
-  
-  # Invia notifica Telegram
+    true_transition: send_notification
+    false_transition: end
+
   send_notification:
     state_type: telegram-bot
     bot_token: "{telegram_bot_token}"
     chat_id: "{telegram_chat_id}"
     message: |
-      🔔 **Nuovo Articolo Rilevante**
-      
-      **Titolo**: {event.title}
-      **Autore**: {event.author}
+      🔔 **New Relevant Article**
+
+      **Title**: {event.title}
+      **Author**: {event.author}
       **Link**: {event.link}
-      
-      **Summary**: {event.summary[:200]}...
-    transition: "end"
-  
-  # Terminazione
+    transition: end
+
   end:
     state_type: end
 ```
 
-### 🚀 Esecuzione Flow
-
-```bash
-# Esecuzione diretta
-cd ai-automation-fsm-py
-python main.py diagrammi/example_rss_monitor.yaml
-
-# Con parametri aggiuntivi
-python main.py diagrammi/telegram_bot.yaml --verbose --max-steps 50
-
-# In modalità daemon (background)
-nohup python main.py diagrammi/monitoring_flow.yaml > flow.log 2>&1 &
-```
-
-### 🧪 Testing FSM Engine
-
-```bash
-cd ai-automation-fsm-py
-
-# Test suite completa
-pytest
-
-# Test con coverage
-pytest --cov=flow --cov-report=html
-
-# Test specifici per stati
-pytest test/test_states/ -v
-
-# Test integrazione
-pytest test/test_integration.py -v
-```
-
-### 🔌 Sistema Plugin Avanzato
-
-Il FSM Engine supporta plugin dinamici per estendere le funzionalità:
-
-```bash
-# Gestione plugin tramite package manager
-python package_manager.py install telegram-advanced
-python package_manager.py list
-python package_manager.py update all
-
-# Plugin vengono caricati automaticamente da:
-# - Directory locale plugins/
-# - Repository GitHub intellyhub-plugins
-# - Package PyPI con prefisso intellyhub-plugin-
-```
-
-### 📚 Documentazione FSM
-
-- **[YAML_DSL_COMPLETE_GUIDE.md](ai-automation-fsm-py/documentazione/YAML_DSL_COMPLETE_GUIDE.md)** - Guida completa DSL YAML
-- **[PLUGIN_SYSTEM.md](ai-automation-fsm-py/documentazione/PLUGIN_SYSTEM.md)** - Architettura sistema plugin  
-- **[PLUGIN_CREATION_GUIDE.md](ai-automation-fsm-py/documentazione/PLUGIN_CREATION_GUIDE.md)** - Come creare plugin custom
-- **[LAZY_LOADING_SYSTEM.md](ai-automation-fsm-py/documentazione/LAZY_LOADING_SYSTEM.md)** - Sistema caricamento dinamico
-
 ## 📚 API Reference
 
-### Autenticazione
+Key endpoints (see `intellyhub-be/docs/api-reference.md` for full details):
+
+- **Auth**: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
+- **Flows**: `GET /api/flows`, `POST /api/flows`, `POST /api/flows/<id>/execute`
+- **Billing**: `GET /api/billing/plans`, `GET /api/billing/subscription`, `POST /api/billing/create-checkout-session`
+- **Admin**: `GET /api/admin/dashboard`, `GET /api/admin/users`
+- **Analytics**: `GET /api/analytics/conversion-rate`, `GET /api/exports/users?format=csv`
+- **Health & Metrics**: `GET /health`, `GET /api/metrics`, `GET /api/health?detailed=true`
+
+## 🔍 Monitoring & Observability
 
 ```bash
-# Registrazione utente
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "SecurePass123!"}'
-
-# Login utente
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "SecurePass123!"}'
-```
-
-### Flow Management
-
-```bash
-# Lista flow dell'utente
-curl -X GET http://localhost:5000/api/flows \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-
-# Crea nuovo flow
-curl -X POST http://localhost:5000/api/flows \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "My Flow", "yaml_content": "..."}'
-
-# Esegui flow
-curl -X POST http://localhost:5000/api/flows/FLOW_ID/execute \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### Billing & Subscriptions
-
-```bash
-# Lista piani disponibili
-curl -X GET http://localhost:5000/api/billing/plans
-
-# Sottoscrizione corrente
-curl -X GET http://localhost:5000/api/billing/subscription \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-
-# Crea sessione checkout
-curl -X POST http://localhost:5000/api/billing/create-checkout-session \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"plan_name": "standard"}'
-```
-
-### Analytics & Admin
-
-```bash
-# Dashboard admin (solo admin)
-curl -X GET http://localhost:5000/api/admin/dashboard \
-  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
-
-# Conversion rate
-curl -X GET http://localhost:5000/api/analytics/conversion-rate \
-  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
-
-# Export utenti
-curl -X GET http://localhost:5000/api/exports/users?format=csv \
-  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
-```
-
-## 🔍 Monitoraggio e Osservabilità
-
-### Metriche Prometheus
-
-```bash
-# Endpoint metriche (formato Prometheus)
-curl http://localhost:5000/api/metrics
-
-# Health check dettagliato
+curl http://localhost:5000/api/metrics         # Prometheus metrics
 curl http://localhost:5000/api/health?detailed=true
+curl -X GET http://localhost:5000/api/system-metrics -H "Authorization: Bearer ADMIN_TOKEN"
 
-# System metrics (admin only)
-curl -X GET http://localhost:5000/api/system-metrics \
-  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
-```
-
-### Logging e Debug
-
-```bash
-# Visualizza logs in real-time
 docker compose logs -f api
 docker compose logs -f frontend
-
-# Logs specifici per servizio
-docker compose logs api --tail=100
-docker compose logs db --since=1h
 ```
 
-## 🛠️ Development
-
-### Setup Ambiente Sviluppo
+## 🛠️ Development Workflow
 
 ```bash
-# Backend development
+# Backend
 cd intellyhub-be
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+flask db upgrade
+python setup_admin.py
+python run.py
 
-# Frontend development
+# Frontend
 cd intellyhub-fe
 npm install
 npm run dev
 ```
 
-### Hot Reload
+- Docker Compose is configured for hot reload (bind mounting code into containers)
+- Database migrations via `flask db migrate` / `flask db upgrade`
 
-Il docker-compose.yml è configurato per il development con hot-reload automatico:
+## 🚢 Deployment
 
-- **Backend**: Modifiche in `intellyhub-be/` ricaricano automaticamente Flask
-- **Frontend**: Modifiche in `intellyhub-fe/src/` ricompilano automaticamente Vite
-- **Database**: Dati persistenti tramite volume Docker
-
-### Database Migrations
-
-```bash
-# Crea nuova migrazione
-docker compose exec api python3 -m flask db migrate -m "Descrizione migrazione"
-
-# Applica migrazioni
-docker compose exec api python3 -m flask db upgrade
-
-# Rollback migrazione
-docker compose exec api python3 -m flask db downgrade
-```
-
-## 🚢 Deployment Produzione
-
-### Docker Swarm
-
+### Docker Swarm (excerpt)
 ```yaml
-# docker-stack.yml
 version: '3.8'
 services:
   api:
@@ -561,16 +339,22 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql+psycopg2://user:pass@db:5432/intellyhub
+    volumes:
+      - flows_data:/data/flows
+
   frontend:
     image: intellyhub/frontend:latest
     deploy:
       replicas: 2
+    ports:
+      - "80:80"
 ```
 
-### Kubernetes
-
+### Kubernetes (excerpt)
 ```yaml
-# k8s-deployment.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -586,47 +370,40 @@ spec:
         app: intellyhub-api
     spec:
       containers:
-      - name: api
-        image: intellyhub/backend:latest
-        ports:
-        - containerPort: 5000
+        - name: api
+          image: intellyhub/backend:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: intellyhub-config
 ```
 
 ## 📈 Performance & Scaling
 
-### Metriche di Performance
-- **Response Time API**: < 200ms (p95)
-- **Database Queries**: < 50ms (p95)
-- **Flow Execution**: < 30s (automazioni standard)
-- **Concurrent Users**: 1000+ utenti simultanei
-- **Pod Capacity**: 100+ pod in parallelo per piano Enterprise
+- API response time: < 200 ms (p95)
+- Database queries: < 50 ms (p95) with prepared statements and indexes
+- Flow execution: < 30 s for standard automations
+- Concurrent users: 1000+ supported with horizontal scaling
+- Pod capacity: 100+ FSM pods in parallel for enterprise plans
 
-### Ottimizzazioni
-- **Database**: Connection pooling, query optimization, indexes
-- **API**: Rate limiting, caching Redis, response compression
-- **Frontend**: Code splitting, lazy loading, asset optimization
-- **Infrastructure**: Load balancing, CDN, auto-scaling
+Optimizations: database connection pooling, Redis caching, gzip compression, frontend code splitting, load-balanced deployments, CDN distribution.
 
 ## 🤝 Contributing
 
 ```bash
-# Fork del repository
 gh repo fork kuduk/IntellyHub
-
-# Crea branch feature
-git checkout -b feature/nome-feature
-
-# Commit changes
-git commit -m "feat: descrizione feature"
-
-# Push e crea PR
-git push origin feature/nome-feature
-gh pr create --title "Feature: Nome Feature"
+git checkout -b feature/my-feature
+# make changes
+git commit -m "feat: add my feature"
+git push origin feature/my-feature
+gh pr create --title "Feature: My Feature"
 ```
 
-### Standards di Qualità
-- ✅ **Test Coverage**: >= 80% per backend, >= 70% per frontend  
-- ✅ **Code Quality**: ESLint/Pylint passing
-- ✅ **Security**: Audit automatico delle dipendenze
-- ✅ **Documentation**: JSDoc/Sphinx per funzioni pubbliche
+Quality bar:
+- ✅ Test coverage ≥ 80% backend / ≥ 70% frontend
+- ✅ Linting (Pylint/ESLint) passes
+- ✅ Security scanning for dependencies
+- ✅ Documentation updated alongside code
 
+IntellyHub is in active development—open issues or discussions if you find discrepancies or want to propose improvements.

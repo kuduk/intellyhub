@@ -75,10 +75,10 @@ docker compose exec api python3 setup_admin.py
 
 ## Next Steps
 
-- Read the [User Guide](user-guide.md) to learn about creating automations
-- Check the [Plugin Reference](plugin-reference.md) for available integrations
-- See [Configuration Guide](configuration.md) for advanced setup
-- Visit [Developer Guide](developer-guide.md) if you want to contribute
+- Continue with the [Installation Guide](installation.md) for advanced or customized environments
+- Review the [backend API Reference](../intellyhub-be/docs/api-reference.md) before integrating external services
+- Learn the DSL in depth via [YAML_DSL_COMPLETE_GUIDE.md](../ai-automation-fsm-py/documentazione/YAML_DSL_COMPLETE_GUIDE.md)
+- Explore [PLUGIN_SYSTEM.md](../ai-automation-fsm-py/documentazione/PLUGIN_SYSTEM.md) to extend the FSM engine with new states/listeners
 
 ## Troubleshooting Quick Issues
 

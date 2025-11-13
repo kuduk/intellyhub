@@ -448,7 +448,7 @@ chmod +x intellyhub-be/entrypoint.sh
 ### Getting Help
 
 If you encounter issues:
-1. Check the [Troubleshooting Guide](troubleshooting.md)
+1. Review the [Troubleshooting](#troubleshooting) section in this guide
 2. Review service logs with `docker compose logs`
 3. Check [GitHub Issues](https://github.com/kuduk/IntellyHub/issues)
 4. Ensure all prerequisites are met
@@ -457,5 +457,5 @@ If you encounter issues:
 
 After successful installation:
 - Follow the [Quick Start Guide](quick-start.md) to create your first automation
-- Read the [Configuration Guide](configuration.md) for advanced setup
-- Check the [Security Guide](security.md) for production hardening
+- Revisit the [Environment Configuration](#environment-configuration) section for advanced settings
+- Review [SECURITY_SYSTEM.md](../intellyhub-be/documentazione/SECURITY_SYSTEM.md) for production hardening
